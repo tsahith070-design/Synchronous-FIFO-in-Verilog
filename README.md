@@ -43,14 +43,6 @@ Each check prints PASS or FAIL with the relevant signal values to the simulation
 
 ## Running the simulation
 
-Any standard Verilog or SystemVerilog simulator will work, for example Vivado's simulator (XSIM) or Icarus Verilog:
-
-```bash
-iverilog -g2012 -o fifo_sim fifo_design.v fifo_tb.sv
-vvp fifo_sim
-```
-
-Waveforms can be viewed with your simulator's waveform viewer, such as Vivado's integrated waveform window or GTKWave for Icarus.
-iverilog -g2012 -o fifo_sim fifo_design.v fifo_tb.sv
-vvp fifo_sim
-```
+## Simulation Output !
+![Simulation Waveform]()
+![Simulation Waveform]()
