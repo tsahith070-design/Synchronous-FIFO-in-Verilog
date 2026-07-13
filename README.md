@@ -41,12 +41,6 @@ Covered scenarios:
 
 Each check prints PASS or FAIL with the relevant signal values to the simulation console.
 
-### Known scope limitations
-The following were left out due to time constraints and would be good follow-ups for more thorough verification:
-- Simultaneous read and write exactly at the full or empty boundary (asymmetric edge case where only one of the two operations succeeds).
-- Pointer wrap-around across multiple full fill and drain cycles.
-- Randomized or constrained-random stress testing.
-
 ## Running the simulation
 
 Any standard Verilog or SystemVerilog simulator will work, for example Vivado's simulator (XSIM) or Icarus Verilog:
