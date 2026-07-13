@@ -43,6 +43,5 @@ Each check prints PASS or FAIL with the relevant signal values to the simulation
 
 ## Running the simulation
 
-## Simulation Output !
-![Simulation Waveform]()
-![Simulation Waveform]()
+![Simulation Waveform](screenshot.png)
+![Simulation Waveform](screenshot1.png)
