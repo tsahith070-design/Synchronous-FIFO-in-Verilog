@@ -1,37 +1,62 @@
-# Synchronous FIFO in Verilog 🔁
+# FIFO Design & Verification
 
-A parameterized, synchronous FIFO (First-In-First-Out) buffer designed in Verilog, along with a basic testbench to verify its core functionality.
+A synchronous FIFO (First-In-First-Out) buffer, parameterized by data width and depth, with a basic Verilog testbench.
 
-## 📁 Files
-| File | Description |
-|------|-------------|
-| `fifo_design.v` | FIFO RTL design |
-| `fifo_tb.sv` | Testbench |
+## Design
 
-## ⚙️ Parameters
-| Parameter | Default | Description |
-|-----------|---------|--------------|
-| `DATA_WIDTH` | 8 | Width of each data word |
-| `FIFO_DEPTH` | 16 | Number of storage locations |
+`fifo_design.v` implements a circular-buffer FIFO using:
+- Separate write and read pointers, each one bit wider than needed to address the memory, to distinguish the full condition from the empty condition without extra flags.
+- A registered `count` output tracking current occupancy.
+- Asynchronous, active-high reset (`areset`).
+- Full and empty detection derived combinationally from the pointers.
 
-## ✨ Features
-- Synchronous read and write operations
-- Asynchronous, active-high reset
-- Full and empty flag generation
-- Live occupancy counter (`count`)
+### Ports
 
-## 🧪 Testbench Coverage
-- Reset behavior
-- Filling the FIFO to full, and blocking further writes
-- Draining the FIFO to empty, checking correct read order
-- Simultaneous read and write
-- Asynchronous reset mid-operation
+| Port     | Direction | Width                 | Description                      |
+|----------|-----------|-----------------------|-----------------------------------|
+| clk      | input     | 1                     | Clock                            |
+| areset   | input     | 1                     | Asynchronous, active-high reset  |
+| wr_data  | input     | DATA_WIDTH            | Write data                       |
+| wr_en    | input     | 1                     | Write enable                     |
+| rd_en    | input     | 1                     | Read enable                      |
+| rd_data  | output    | DATA_WIDTH            | Read data (registered)           |
+| full     | output    | 1                     | FIFO full flag                   |
+| empty    | output    | 1                     | FIFO empty flag                  |
+| count    | output    | $clog2(FIFO_DEPTH)+1  | Current number of items stored   |
 
-## ▶️ How to Run
-Compile and simulate `fifo_design.v` and `fifo_tb.sv` together using any Verilog/SystemVerilog simulator — e.g. Vivado XSIM, Icarus Verilog, or ModelSim.
+### Parameters
+- `DATA_WIDTH` (default 8)
+- `FIFO_DEPTH` (default 16)
+
+## Testbench
+
+`fifo_tb.sv` is a basic testbench that drives inputs on the negative clock edge and lets the DUT sample them on the following positive edge, avoiding race conditions between testbench stimulus and DUT sampling.
+
+Covered scenarios:
+1. Reset - verifies empty=1, full=0, count=0 after areset.
+2. Fill to full - writes FIFO_DEPTH items, checks full asserts at the correct point, and confirms a write attempted while full is correctly blocked.
+3. Drain to empty - reads all items back out, verifies FIFO ordering (first written = first read), checks empty asserts correctly, and confirms a read attempted while empty is correctly blocked.
+4. Simultaneous read and write - with the FIFO neither full nor empty, asserts wr_en and rd_en on the same clock edge and verifies count stays unchanged.
+5. Asynchronous reset mid-operation - asserts areset while the FIFO holds data and verifies it clears immediately and correctly.
+
+Each check prints PASS or FAIL with the relevant signal values to the simulation console.
+
+### Known scope limitations
+The following were left out due to time constraints and would be good follow-ups for more thorough verification:
+- Simultaneous read and write exactly at the full or empty boundary (asymmetric edge case where only one of the two operations succeeds).
+- Pointer wrap-around across multiple full fill and drain cycles.
+- Randomized or constrained-random stress testing.
+
+## Running the simulation
+
+Any standard Verilog or SystemVerilog simulator will work, for example Vivado's simulator (XSIM) or Icarus Verilog:
 
 ```bash
-# Example with Icarus Verilog
+iverilog -g2012 -o fifo_sim fifo_design.v fifo_tb.sv
+vvp fifo_sim
+```
+
+Waveforms can be viewed with your simulator's waveform viewer, such as Vivado's integrated waveform window or GTKWave for Icarus.
 iverilog -g2012 -o fifo_sim fifo_design.v fifo_tb.sv
 vvp fifo_sim
 ```
